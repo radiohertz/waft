@@ -1969,35 +1969,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "streamit"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "askama",
- "askama_axum",
- "axum",
- "axum-extra",
- "bytes",
- "chrono",
- "circular-buffer",
- "clap",
- "commonlib",
- "futures",
- "httpflv",
- "reqwest 0.12.4",
- "rtmp",
- "serde",
- "serde_json",
- "streamhub",
- "tokio",
- "toml",
- "tower",
- "tower-http",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2524,6 +2495,35 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "waft"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "askama",
+ "askama_axum",
+ "axum",
+ "axum-extra",
+ "bytes",
+ "chrono",
+ "circular-buffer",
+ "clap",
+ "commonlib",
+ "futures",
+ "httpflv",
+ "reqwest 0.12.4",
+ "rtmp",
+ "serde",
+ "serde_json",
+ "streamhub",
+ "tokio",
+ "toml",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "want"

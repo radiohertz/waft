@@ -31,7 +31,7 @@
         var videoElement = document.getElementById('videoElement');
         var flvPlayer = flvjs.createPlayer({
           type: 'flv',
-          url: `${window.location.protocol}//{window.location.host}/live`
+          url: `${window.location.protocol}//${window.location.host}/live`
         });
         flvPlayer.attachMediaElement(videoElement);
         flvPlayer.load();

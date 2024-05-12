@@ -96,7 +96,7 @@ async fn main() {
         let auth = auth.clone();
         tokio::spawn(async move {
             let mut rtmp_server = RtmpServer::new(
-                format!("127.0.0.1:{rtmp_port}"),
+                format!("0.0.0.0:{rtmp_port}"),
                 strm_sender,
                 1,
                 Some(auth.clone()),
@@ -108,8 +108,9 @@ async fn main() {
     }
 
     let strm_sender = stream_hub.get_hub_event_sender();
+    let port = config.port();
     tokio::spawn(async move {
-        if let Err(e) = httpflv::server::run(strm_sender, 3002, Some(auth)).await {
+        if let Err(e) = httpflv::server::run(strm_sender, (port + 1) as usize, Some(auth)).await {
             tracing::error!("httpflv exited: {e}");
         }
     });
