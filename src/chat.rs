@@ -86,7 +86,7 @@ async fn chat_handler(stream: WebSocket, state: Arc<AppState>) {
 
     let mut username = String::new();
     // First message will always be the Join message
-    while let Some(Ok(msg)) = recv.next().await {
+    if let Some(Ok(msg)) = recv.next().await {
         match Message::try_from(msg) {
             Ok(msg) => {
                 let mut user_list = state.users.lock().await;
@@ -96,7 +96,6 @@ async fn chat_handler(stream: WebSocket, state: Arc<AppState>) {
                 if !user_list.contains(&msg.username) {
                     user_list.insert(msg.username.to_string());
                     username = msg.username;
-                    break;
                 } else {
                     _ = sender
                         .send(Message::new(MessageType::UsernameTaken, msg.username, None).into())
@@ -116,7 +115,7 @@ async fn chat_handler(stream: WebSocket, state: Arc<AppState>) {
     // send the chat history
     let history: Vec<_> = {
         let history = state._history.read().await;
-        history.iter().map(|msg| msg.clone()).collect()
+        history.iter().cloned().collect()
     };
     for msg in history {
         if let Err(e) = sender.send(msg.clone().into()).await {
