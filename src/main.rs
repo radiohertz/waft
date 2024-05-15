@@ -28,6 +28,9 @@ struct CliArgs {
     /// Path to the toml config file
     #[arg(long)]
     config: Option<std::path::PathBuf>,
+    /// assets path
+    #[arg(long)]
+    assets: Option<std::path::PathBuf>,
 }
 
 /// State of the app
@@ -72,6 +75,7 @@ async fn main() {
         .init();
 
     let args = CliArgs::parse();
+    tracing::info!("{:?}", args.config);
 
     let config = if let Some(config_path) = args.config {
         Config::load_from_file(&config_path).unwrap()
@@ -139,13 +143,16 @@ async fn main() {
         });
     }
 
-    let address = format!("127.0.0.1:{}", config.port());
+    let address = format!("0.0.0.0:{}", config.port());
     let router = Router::new()
         .route("/", get(IndexTemplate::handler))
         .route("/live", get(live_proxy))
         .route("/chat", get(chat_ws_handler))
         .route("/auth", get(auth_handler))
-        .nest_service("/assets", ServeDir::new("assets"))
+        .nest_service(
+            "/assets",
+            ServeDir::new(args.assets.unwrap_or("assets".into())),
+        )
         .with_state(Arc::new(AppState {
             config,
             tx,

@@ -1,0 +1,16 @@
+services:
+  server:
+    restart: always
+    build:
+      context: .
+      target: final
+    ports:
+      - 3000:3000
+      - 3001:3001
+      - 1935:1935
+    volumes:
+      - waft-data:/data
+    command: ["/bin/waft", "--assets", "/bin/assets", "--config", "/data/config.toml"]
+
+volumes:
+  waft-data:
