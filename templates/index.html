@@ -16,7 +16,17 @@
 
 <body>
   <div class="nav">
-    <h3 class="nav-title">waft</h3>
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
+    <img src="/assets/cat.webp" height="50px" width="50px" />
     {% if let Some(title) = title %}
     <p>Streaming: {{title}}</p>
     {% endif %}
@@ -26,13 +36,16 @@
 
   {% else %}
   <div class="container">
+    <img src="/assets/cat.webp" />
     <div class="auth">
       <p>enter passcode to join</p>
       <form action="/auth" method="GET">
         <input type="password" name="key" class="txt-input" />
         <input type="submit" value="join" class="submit-btn" />
       </form>
-      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 </body>
 
 </html>

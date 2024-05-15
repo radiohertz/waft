@@ -18,7 +18,7 @@ use streamhub::StreamsHub;
 mod chat;
 mod config;
 use config::Config;
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::{broadcast, Mutex, RwLock};
 use tower_http::services::ServeDir;
 
 use crate::chat::chat_ws_handler;
@@ -39,7 +39,7 @@ struct AppState {
     /// users in the chat room
     users: Mutex<HashSet<String>>,
     /// history of the chat, stores the last 25 messages
-    _history: Mutex<CircularBuffer<25, chat::Message>>,
+    _history: Arc<RwLock<CircularBuffer<50, chat::Message>>>,
 }
 
 #[derive(Template)]
@@ -80,11 +80,7 @@ async fn main() {
         Config::default()
     };
 
-    // start the rtmp server
-    let rtmp_port = config.rtmp_port();
     let mut stream_hub = StreamsHub::new(None);
-    let strm_sender = stream_hub.get_hub_event_sender();
-
     let auth = Auth::new(
         "".to_string(), // this is ignored if auth algo is AuthAlogrithm::Simple
         config.stream_key().to_string(),
@@ -92,7 +88,11 @@ async fn main() {
         commonlib::auth::AuthType::Push,
     );
 
+    // start the rtmp server
     {
+        let rtmp_port = config.rtmp_port();
+        let strm_sender = stream_hub.get_hub_event_sender();
+
         let auth = auth.clone();
         tokio::spawn(async move {
             let mut rtmp_server = RtmpServer::new(
@@ -107,19 +107,38 @@ async fn main() {
         });
     }
 
-    let strm_sender = stream_hub.get_hub_event_sender();
-    let port = config.port();
-    tokio::spawn(async move {
-        if let Err(e) = httpflv::server::run(strm_sender, (port + 1) as usize, Some(auth)).await {
-            tracing::error!("httpflv exited: {e}");
-        }
-    });
+    // start httpflv server
+    // it converts our rtmp stream to an flv stream for the browser
+    {
+        let strm_sender = stream_hub.get_hub_event_sender();
+        let port = config.port();
+        tokio::spawn(async move {
+            if let Err(e) = httpflv::server::run(strm_sender, (port + 1) as usize, Some(auth)).await
+            {
+                tracing::error!("httpflv exited: {e}");
+            }
+        });
+    }
 
     tokio::spawn(async move {
         stream_hub.run().await;
     });
 
     let (tx, _rx) = broadcast::channel(100);
+
+    let history = Arc::new(RwLock::new(CircularBuffer::new()));
+    // task to keep track of chat history
+    {
+        let tx = tx.clone();
+        let mut rx = tx.subscribe();
+        let history = Arc::clone(&history);
+        tokio::spawn(async move {
+            while let Ok(msg) = rx.recv().await {
+                history.write().await.push_back(msg);
+            }
+        });
+    }
+
     let address = format!("127.0.0.1:{}", config.port());
     let router = Router::new()
         .route("/", get(IndexTemplate::handler))
@@ -131,7 +150,7 @@ async fn main() {
             config,
             tx,
             users: Mutex::new(HashSet::new()),
-            _history: Mutex::new(CircularBuffer::new()),
+            _history: history,
         }));
 
     let listener = tokio::net::TcpListener::bind(address.to_string())

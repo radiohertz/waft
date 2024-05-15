@@ -22,133 +22,169 @@
     </div>
   </div>
   <div>
+    <audio controls id="audio" src="/assets/audio/notification.mp3"></audio>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.2/flv.min.js"
-      integrity="sha512-49OFf+8jaHx4Vb7iFNb46Loq1pIxXlEYeVOQRIx0KLBRF4KSV6E7QK2Vw5r416TQDyBJW+DFh2CyTV7+gCWd6g=="
-      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-      if (flvjs.isSupported()) {
-        var videoElement = document.getElementById('videoElement');
-        var flvPlayer = flvjs.createPlayer({
-          type: 'flv',
-          url: `${window.location.protocol}//${window.location.host}/live`
-        });
-        flvPlayer.attachMediaElement(videoElement);
-        flvPlayer.load();
-        //flvPlayer.play();
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.2/flv.min.js"
+    integrity="sha512-49OFf+8jaHx4Vb7iFNb46Loq1pIxXlEYeVOQRIx0KLBRF4KSV6E7QK2Vw5r416TQDyBJW+DFh2CyTV7+gCWd6g=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    if (flvjs.isSupported()) {
+      var videoElement = document.getElementById('videoElement');
+      var flvPlayer = flvjs.createPlayer({
+        type: 'flv',
+        url: `${window.location.protocol}//${window.location.host}/live`
+      });
+      flvPlayer.attachMediaElement(videoElement);
+      flvPlayer.load();
+      flvPlayer.play();
+    }
+
+    const audio = document.getElementById("audio");
+    audio.style.display = 'none';
+
+    let ws_proto = 'wss';
+    let host = window.location.host;
+    if (window.location.protocol === 'http:') {
+      ws_proto = 'ws';
+    }
+
+    const ws_url = `${ws_proto}://${host}/chat`;
+    const uname_box = document.getElementById("uname-box");
+    const uname_box_input = document.getElementById("uname-box-input");
+    const chat_box = document.getElementById("chatinp-box");
+    const chat_history = document.getElementById("chat-history");
+    const chatinp = document.getElementById("chatinp");
+    chat_box.style.display = 'none';
+
+    uname_box_input.addEventListener("keypress", function (event) {
+      // If the user presses the "Enter" key on the keyboard
+      if (event.key === "Enter") {
+        startWs(uname_box_input.value);
+      }
+    });
+
+    let set_uname_btn = document.getElementById("set-uname-btn");
+    set_uname_btn.addEventListener("click", () => {
+      startWs(uname_box_input.value)
+    });
+
+    const startWs = (username) => {
+      if (username.length === 0) {return;}
+      console.log("Starting ws with username: ", username);
+      uname_box_input.value = '';
+
+      let ws = new WebSocket(ws_url);
+      ws.onopen = (e) => {
+        console.log("Connection established..., sending Join message");
+        chat_history.innerHTML = '';
+        const msg = {
+          "type": "Join",
+          "username": username,
+          "ts": new Date().toUTCString()
+        };
+        ws.send(JSON.stringify(msg));
+
+        uname_box.style.display = 'none';
+        chat_box.style.display = 'block';
       }
 
-
-      let ws_proto = 'wss';
-      let host = window.location.host;
-      if (window.location.protocol === 'http:') {
-        ws_proto = 'ws';
-      }
-
-      const ws_url = `${ws_proto}://${host}/chat`;
-      const uname_box = document.getElementById("uname-box");
-      const uname_box_input = document.getElementById("uname-box-input");
-      const chat_box = document.getElementById("chatinp-box");
-      const chat_history = document.getElementById("chat-history");
-      const chatinp = document.getElementById("chatinp");
-      chat_box.style.display = 'none';
-
-      uname_box_input.addEventListener("keypress", function (event) {
-        // If the user presses the "Enter" key on the keyboard
-        if (event.key === "Enter") {
-          startWs(uname_box_input.value);
-        }
-      });
-
-      let set_uname_btn = document.getElementById("set-uname-btn");
-      set_uname_btn.addEventListener("click", () => {
-        startWs(uname_box_input.value)
-      });
-
-      const startWs = (username) => {
-        console.log("Starting ws with username: ", username);
-        uname_box_input.value = '';
-
-        let ws = new WebSocket(ws_url);
-        ws.onopen = (e) => {
-          console.log("Connection established..., sending Join message");
-          const msg = {
-            "type": "Join",
-            "username": username,
-            "ts": new Date().toUTCString()
-          };
-          ws.send(JSON.stringify(msg));
-
-          uname_box.style.display = 'none';
-          chat_box.style.display = 'block';
-        }
-
-        ws.onclose = (e) => {
-          console.log(e);
-          chat_history.innerHTML += `
+      ws.onclose = (e) => {
+        console.log(e);
+        chat_history.innerHTML += `
             <div class="msg-group">
-              <div class="user-hl">disconnected</div>.
+              <div class="user-hl">chat disconnected, please reconnect.</div>
             </div>
           `;
-          location.reload()
-        }
 
-        ws.onmessage = (e) => {
-          const data = JSON.parse(e.data);
-          switch (data.type) {
-            case "Join": {
-              if (data.username == username) {
-                startChat(username, ws);
-              }
+        document.getElementById("chat-msg-send-btn").removeEventListener("click", btn_handler);
+        chatinp.removeEventListener("keypress", chat_handler);
+        console.log("removed event listeners");
+        chat_box.style.display = 'none';
+        uname_box.style.display = 'block';
+      }
 
-              chat_history.innerHTML += `
+      ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        switch (data.type) {
+          case "Join": {
+            if (data.username == username) {
+              startChat(username, ws);
+            }
+
+            chat_history.innerHTML += `
             <div class="msg-group">
               <div class="user-hl">${data.username}</div> has joined the chat.
             </div>
           `;
-              break;
-            }
-            case "Leave": {
-              chat_history.innerHTML += `
+            break;
+          }
+          case "Leave": {
+            chat_history.innerHTML += `
             <div class="msg-group">
               <div class="user-hl">${data.username}</div> has left the chat.
             </div>
           `;
-              break;
-            }
-            case "Text": {
-              chat_history.innerHTML += `
+            break;
+          }
+          case "Text": {
+            chat_history.innerHTML += `
             <div class="msg-group">
               <div class="user-hl">${data.username}</div>: ${data.content}
             </div>`
-              break;
+            if (document.fullscreenElement) {
+              // play a sound to notify when user is in fullscreen
+              audio.play();
             }
+            break;
           }
-
-          chat_history.scrollTop = chat_history.scrollHeight;
+          case "UsernameTaken": {
+            chat_history.innerHTML += `
+            <div class="msg-group">
+              <div class="user-hl">${data.username}</div> is taken
+            </div>              
+            `
+          }
         }
+        chat_history.scrollTop = chat_history.scrollHeight;
       }
+    }
 
-      const startChat = (username, ws) => {
-        document.getElementById("chat-msg-send-btn").addEventListener("click", () => {
-          sendMsg(chatinp.value, username, ws)
-        });
+    let btn_handler;
+    let chat_handler;
 
-        chatinp.addEventListener("keypress", function (event) {
-          if (event.key === "Enter") {
+    const startChat = (username, ws) => {
+      btn_handler = () => {
+        sendMsg(chatinp.value, username, ws)
+        chatinp.value = '';
+      };
+      chat_handler = (e) => {
+        if (event.key === "Enter") {
+          e.preventDefault();
+          if (event.shiftKey) {
+            chatinp.value += '\n';
+          } else {
+            e.preventDefault();
             sendMsg(chatinp.value, username, ws)
             chatinp.value = '';
           }
-        });
+        }
       }
 
-      const sendMsg = (msg, username, ws) => {
-        ws.send(JSON.stringify({
-          "type": "Text",
-          "username": username,
-          "content": msg
-        }));
+      document.getElementById("chat-msg-send-btn").addEventListener("click", btn_handler);
+      chatinp.addEventListener("keypress", chat_handler);
+    }
 
+    const sendMsg = (msg, username, ws) => {
+      if (msg === "\n" || msg === "") {
+        return;
       }
+      ws.send(JSON.stringify({
+        "type": "Text",
+        "username": username,
+        "content": msg
+      }));
 
-    </script>
+    }
+
+  </script>

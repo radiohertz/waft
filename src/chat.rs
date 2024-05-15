@@ -90,6 +90,9 @@ async fn chat_handler(stream: WebSocket, state: Arc<AppState>) {
         match Message::try_from(msg) {
             Ok(msg) => {
                 let mut user_list = state.users.lock().await;
+                if msg.username.is_empty() {
+                    return;
+                }
                 if !user_list.contains(&msg.username) {
                     user_list.insert(msg.username.to_string());
                     username = msg.username;
@@ -110,12 +113,22 @@ async fn chat_handler(stream: WebSocket, state: Arc<AppState>) {
 
     tracing::info!("Connected: {username}");
 
+    // send the chat history
+    let history: Vec<_> = {
+        let history = state._history.read().await;
+        history.iter().map(|msg| msg.clone()).collect()
+    };
+    for msg in history {
+        if let Err(e) = sender.send(msg.clone().into()).await {
+            tracing::info!("Failed to send history: {e}");
+        }
+    }
     let mut rx = state.tx.subscribe();
 
     let uname = username.to_string();
     let mut t2 = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
-            tracing::info!("Recv message from other websockets {uname:?}: {msg:?}");
+            tracing::trace!("Recv message from other websockets {uname:?}: {msg:?}");
             if let Err(e) = sender.send(msg.into()).await {
                 tracing::info!("Error: {e:?}");
                 break;
@@ -124,6 +137,7 @@ async fn chat_handler(stream: WebSocket, state: Arc<AppState>) {
     });
 
     let tx = state.tx.clone();
+
     _ = tx.send(Message {
         r#type: MessageType::Join,
         username: username.to_string(),
@@ -133,14 +147,14 @@ async fn chat_handler(stream: WebSocket, state: Arc<AppState>) {
     let mut t1 = tokio::spawn(async move {
         while let Some(Ok(msg)) = recv.next().await {
             if let Ok(msg) = Message::try_from(msg) {
-                tracing::info!("Recv message from ws: {msg:?}");
+                tracing::trace!("Recv message from ws: {msg:?}");
                 _ = tx.send(msg);
             }
         }
     });
 
     tokio::select! {
-        _ = &mut t1 => t1.abort() ,
+        _ = &mut t1 => t1.abort(),
         _ = &mut t2 => t2.abort(),
     };
 
