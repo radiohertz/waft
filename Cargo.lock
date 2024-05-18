@@ -335,8 +335,9 @@ checksum = "514de17de45fdb8dc022b1a7975556c53c86f9f0aa5f534b98977b171857c2c9"
 
 [[package]]
 name = "bytesio"
-version = "0.3.2"
-source = "git+https://github.com/radiohertz/xiu.git?branch=fix-rtmp-token-issue#2b85514a75f9b67613c70d1c12f5cd36ee1c7968"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1e92f963906a8f9c31e643d2c5cbda68ef3b5f8e4c42c4a655d315895bf34fd"
 dependencies = [
  "async-trait",
  "byteorder",
@@ -432,7 +433,8 @@ checksum = "0b6a852b24ab71dffc585bcb46eaf7959d175cb865a7152e35b348d1b2960422"
 [[package]]
 name = "commonlib"
 version = "0.1.1"
-source = "git+https://github.com/radiohertz/xiu.git?branch=fix-rtmp-token-issue#2b85514a75f9b67613c70d1c12f5cd36ee1c7968"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3c5f656d5df3fd4180485135e1a20496b9c371ecd850e22df9c5eab68c03200"
 dependencies = [
  "anyhow",
  "chrono",
@@ -805,8 +807,9 @@ dependencies = [
 
 [[package]]
 name = "h264-decoder"
-version = "0.2.0"
-source = "git+https://github.com/radiohertz/xiu.git?branch=fix-rtmp-token-issue#2b85514a75f9b67613c70d1c12f5cd36ee1c7968"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3580b383e0e3c63c762bdb3a3bd751e5f35bf1ac42987b0754a5498c186f16c0"
 dependencies = [
  "byteorder",
  "bytes",
@@ -931,8 +934,9 @@ checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
 
 [[package]]
 name = "httpflv"
-version = "0.3.1"
-source = "git+https://github.com/radiohertz/xiu.git?branch=fix-rtmp-token-issue#2b85514a75f9b67613c70d1c12f5cd36ee1c7968"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c38d68c8e04eac4301621bc25e87d487688701a8e94514f2e03b7dbdd79ec40f"
 dependencies = [
  "axum",
  "byteorder",
@@ -1700,8 +1704,9 @@ dependencies = [
 
 [[package]]
 name = "rtmp"
-version = "0.4.1"
-source = "git+https://github.com/radiohertz/xiu.git?branch=fix-rtmp-token-issue#2b85514a75f9b67613c70d1c12f5cd36ee1c7968"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78e0f0ed109e5ea9df3b32cbee15329ac8971497284893a3e0157533800c62c4"
 dependencies = [
  "async-trait",
  "byteorder",
@@ -1949,8 +1954,9 @@ dependencies = [
 
 [[package]]
 name = "streamhub"
-version = "0.1.1"
-source = "git+https://github.com/radiohertz/xiu.git?branch=fix-rtmp-token-issue#2b85514a75f9b67613c70d1c12f5cd36ee1c7968"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d1ffa630053d8ec86df7089a96f2c0be24c755d4d0e9df78ace1554b86dd61cf"
 dependencies = [
  "async-trait",
  "byteorder",
@@ -2839,8 +2845,9 @@ dependencies = [
 
 [[package]]
 name = "xflv"
-version = "0.3.0"
-source = "git+https://github.com/radiohertz/xiu.git?branch=fix-rtmp-token-issue#2b85514a75f9b67613c70d1c12f5cd36ee1c7968"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "49197b755bf8c02a8f9d5097d995216cc6b1cd303b182e0dd8e6f7cf1a127361"
 dependencies = [
  "byteorder",
  "bytes",
