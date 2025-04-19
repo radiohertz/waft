@@ -71,14 +71,7 @@ async fn main() {
         .with_max_level(tracing::Level::INFO)
         .init();
 
-    let args = CliArgs::parse();
-
-    let config = if let Some(config_path) = args.config {
-        Config::load_from_file(&config_path).unwrap()
-    } else {
-        tracing::info!("No config provided, this is illegal");
-        Config::default()
-    };
+    let config = Config::load_env().unwrap();
 
     let mut stream_hub = StreamsHub::new(None);
     let auth = Auth::new(

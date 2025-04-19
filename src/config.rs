@@ -25,17 +25,20 @@ pub struct Config {
 }
 
 impl Config {
-    /// Tries to load config from toml file specified by user
-    pub fn load_from_file(path: &std::path::PathBuf) -> anyhow::Result<Self> {
-        tracing::info!("Loading config from {path:?}");
-        let bytes = std::fs::read_to_string(path)?;
-        let config: Self = toml::from_str(&bytes)?;
-        assert!(
-            config.rtmp_port != config.port,
-            "HTTP server port and RTMP port cant be the same."
-        );
+    pub fn load_env() -> anyhow::Result<Self> {
+        let port = std::env::var("WAFT_PORT")?.parse::<u16>()?;
+        let room_key = std::env::var("WAFT_ROOM_KEY")?;
+        let rtmp_port = std::env::var("WAFT_RTMP_PORT")?.parse::<u16>()?;
+        let stream_key = std::env::var("WAFT_STREAM_KEY")?;
+        let title = std::env::var("WAFT_TITLE")?;
 
-        Ok(config)
+        Ok(Self {
+            port: Some(port),
+            key: Some(room_key),
+            rtmp_port: Some(rtmp_port),
+            title: Some(title),
+            stream_key,
+        })
     }
 
     /// Get the port if specified in config or default

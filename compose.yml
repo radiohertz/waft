@@ -1,0 +1,10 @@
+services:
+  waft:
+    build:
+      dockerfile: Dockerfile
+    environment:
+      - WAFT_PORT=9005
+      - WAFT_ROOM_KEY=blrdays
+      - WAFT_RTMP_PORT=1935
+      - WAFT_STREAM_KEY=sekret
+      - WAFT_TITLE=Bengaluru days
